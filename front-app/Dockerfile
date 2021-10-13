@@ -1,16 +1,22 @@
-# STAGE 1: Compile and Build angular codebase
-FROM node:14.18-alpine AS build
+#https://typeofnan.dev/how-to-serve-an-angular-app-with-nginx-in-docker/
+FROM node:14 AS builder
 
-WORKDIR /usr/local/app
+WORKDIR /app
 
-COPY ./ /usr/local/app
+COPY . .
 
-RUN npm install 
-RUN npm run build
+RUN npm i & npm run build
 
-# STAGE 2: Serve app with nginx server
-FROM nginx:latest
+# # # STAGE 2: Serve app with nginx server
+FROM nginx:alpine
 
-COPY --from=build /usr/local/app/dist/front-app /usr/share/nginx/html
+WORKDIR /usr/share/nginx/html
 
-EXPOSE 80
+RUN rm -rf ./*
+
+COPY --from=builder /app/dist/front-app .
+
+ENTRYPOINT ["nginx", "-g", "daemon off;"]
+
+
+
